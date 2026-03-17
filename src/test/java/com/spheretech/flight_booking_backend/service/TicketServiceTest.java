@@ -6,6 +6,7 @@ import com.spheretech.flight_booking_backend.exception.FlightFullException;
 import com.spheretech.flight_booking_backend.exception.ResourceNotFoundException;
 import com.spheretech.flight_booking_backend.model.Flight;
 import com.spheretech.flight_booking_backend.model.Ticket;
+import com.spheretech.flight_booking_backend.repository.AirportRepository;
 import com.spheretech.flight_booking_backend.repository.FlightRepository;
 import com.spheretech.flight_booking_backend.repository.TicketRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,6 +29,12 @@ class TicketServiceTest {
     private TicketRepository ticketRepository;
 
     @Mock
+    private AirportRepository airportRepository;
+
+    @Mock
+    private InteractionService interactionService;
+
+    @Mock
     private FlightRepository flightRepository;
 
     @InjectMocks
@@ -47,7 +54,7 @@ class TicketServiceTest {
     @Test
     void shouldSuccessfullyPurchaseTicket() {
         // Arrange
-        TicketPurchaseRequest request = new TicketPurchaseRequest(1L, "John Doe", "4221161122330005");
+        TicketPurchaseRequest request = new TicketPurchaseRequest(1L, "John Doe", "john@example.com", "4221161122330005");
         
         when(flightRepository.findById(1L)).thenReturn(Optional.of(testFlight));
         
@@ -75,8 +82,9 @@ class TicketServiceTest {
 
     @Test
     void shouldThrowExceptionWhenFlightNotFound() {
-        // Arrange
-        TicketPurchaseRequest request = new TicketPurchaseRequest(99L, "John Doe", "4221161122330005");
+        // Arrange 
+        TicketPurchaseRequest request = new TicketPurchaseRequest(99L, "John Doe", "john@example.com", "4221161122330005");
+        
         when(flightRepository.findById(99L)).thenReturn(Optional.empty());
 
         // Act & Assert
@@ -87,7 +95,7 @@ class TicketServiceTest {
     void shouldThrowExceptionWhenFlightIsFull() {
         // Arrange
         testFlight.setOccupiedSeats(50); // Flight is at max capacity
-        TicketPurchaseRequest request = new TicketPurchaseRequest(1L, "John Doe", "4221161122330005");
+        TicketPurchaseRequest request = new TicketPurchaseRequest(1L, "John Doe", "john@example.com", "4221161122330005");
         when(flightRepository.findById(1L)).thenReturn(Optional.of(testFlight));
 
         // Act & Assert

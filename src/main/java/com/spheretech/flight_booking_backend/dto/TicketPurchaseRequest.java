@@ -1,5 +1,6 @@
 package com.spheretech.flight_booking_backend.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
@@ -10,9 +11,12 @@ public record TicketPurchaseRequest(
     
     @NotBlank(message = "Passenger name is required") 
     String passengerName,
+
+    @NotBlank(message = "Passenger ID (Email) is required")
+    @Email(message = "Passenger ID must be a valid email format")
+    String passengerId,
     
     @NotBlank(message = "Credit card number is required")
-    // A basic regex to ensure the card has at least enough digits to be masked
     @Pattern(regexp = ".*\\d{10,}.*", message = "Invalid credit card format")
     String cardNumber 
 ) {}

@@ -37,8 +37,8 @@ class RouteServiceTest {
 
     @BeforeEach
     void setUp() {
-        departure = new Airport(1L, "Istanbul Airport", "Istanbul", "IST");
-        arrival = new Airport(2L, "Berlin Brandenburg", "Berlin", "BER");
+        departure = new Airport(1L, "Istanbul Airport", "Istanbul", "IST", "Europe", 41.2590, 28.7404, 0);
+        arrival = new Airport(2L, "Berlin Brandenburg", "Berlin", "BER", "Europe", 52.3667, 13.5033, 0);
     }
 
     @Test

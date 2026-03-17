@@ -4,8 +4,10 @@ import com.spheretech.flight_booking_backend.dto.TicketPurchaseRequest;
 import com.spheretech.flight_booking_backend.dto.TicketResponse;
 import com.spheretech.flight_booking_backend.exception.FlightFullException;
 import com.spheretech.flight_booking_backend.exception.ResourceNotFoundException;
+import com.spheretech.flight_booking_backend.model.Airport;
 import com.spheretech.flight_booking_backend.model.Flight;
 import com.spheretech.flight_booking_backend.model.Ticket;
+import com.spheretech.flight_booking_backend.repository.AirportRepository;
 import com.spheretech.flight_booking_backend.repository.FlightRepository;
 import com.spheretech.flight_booking_backend.repository.TicketRepository;
 import com.spheretech.flight_booking_backend.util.CardUtils;
@@ -19,6 +21,8 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final FlightRepository flightRepository;
+    private final InteractionService interactionService; // Injected our new service
+    private final AirportRepository airportRepository;
 
     @Transactional
     public TicketResponse purchaseTicket(TicketPurchaseRequest request) {
@@ -48,7 +52,15 @@ public class TicketService {
         flight.setOccupiedSeats(flight.getOccupiedSeats() + 1);
         flightRepository.save(flight);
 
-        // 7. Return the response DTO
+        // Update Arrival Airport Popularity (+2 for purchase) 
+        Airport arrivalAirport = flight.getRoute().getArrivalAirport();
+        arrivalAirport.setPopularityScore(arrivalAirport.getPopularityScore() + 2);
+        airportRepository.save(arrivalAirport);
+        
+        // 7. Log the interaction for the AI Graph model
+        interactionService.logInteraction(request.passengerId(), flight.getId(), "PURCHASE");
+
+        // 8. Return the response DTO
         return new TicketResponse(
                 savedTicket.getTicketNumber(),
                 savedTicket.getPassengerName(),

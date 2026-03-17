@@ -33,6 +33,12 @@ public class RouteService {
     }
 
     public List<Route> searchRoutes(Long departureId, Long arrivalId) {
+        // Update Arrival Airport Popularity (+1 for search)
+        airportRepository.findById(arrivalId).ifPresent(airport -> {
+            airport.setPopularityScore(airport.getPopularityScore() + 1);
+            airportRepository.save(airport);
+        });
+        
         return routeRepository.findByDepartureAirportIdAndArrivalAirportId(departureId, arrivalId);
     }
 }
