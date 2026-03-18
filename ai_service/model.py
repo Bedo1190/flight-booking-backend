@@ -5,6 +5,8 @@ from torch_geometric.nn import SAGEConv
 from torch_geometric.data import Data
 import json
 import numpy as np
+import os
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 print("🚀 Initializing Graph Neural Network Training Pipeline...")
 
@@ -15,17 +17,17 @@ df = pd.read_csv("interactions.csv")
 unique_users = df['passenger_id'].unique()
 unique_flights = df['flight_id'].unique()
 
-user_mapping = {user_id: i for i, user_id in enumerate(unique_users)}
-flight_mapping = {flight_id: i for i, flight_id in enumerate(unique_flights)}
+user_mapping = {str(user_id): i for i, user_id in enumerate(unique_users)}
+flight_mapping = {int(flight_id): i for i, flight_id in enumerate(unique_flights)}
 
 num_users = len(user_mapping)
 num_flights = len(flight_mapping)
 total_nodes = num_users + num_flights
 
 # Save mappings for the FastAPI server to use later
-with open("user_mapping.json", "w") as f:
+with open(os.path.join(BASE_DIR, "user_mapping.json"), "w") as f:
     json.dump(user_mapping, f)
-with open("flight_mapping.json", "w") as f:
+with open(os.path.join(BASE_DIR, "node_embeddings.pt"), "w") as f:
     json.dump(flight_mapping, f)
 
 # Build the Edge Index (Source -> Target)
@@ -85,12 +87,17 @@ def compute_loss(embeddings, edge_index):
 # --- 4. Training Loop ---
 print(f"🧠 Training model on {device}...")
 model.train()
+
+loss_history = [] # NEW: Array to store loss values
+
 for epoch in range(1, 101):
     optimizer.zero_grad()
     out_embeddings = model(data.x, data.edge_index)
     loss = compute_loss(out_embeddings, data.edge_index)
     loss.backward()
     optimizer.step()
+    
+    loss_history.append(loss.item()) # NEW: Save the loss every epoch
     
     if epoch % 20 == 0:
         print(f"Epoch {epoch:03d}, Loss: {loss.item():.4f}")
@@ -101,6 +108,9 @@ model.eval()
 with torch.no_grad():
     final_embeddings = model(data.x, data.edge_index).cpu()
 
-# Save the raw tensor so FastAPI can load it instantly
-torch.save(final_embeddings, "node_embeddings.pt")
-print("💾 Saved: user_mapping.json, flight_mapping.json, node_embeddings.pt")
+# NEW: Save the loss history
+with open(os.path.join(BASE_DIR, "loss_history.json"), "w") as f:
+    json.dump(loss_history, f)
+
+torch.save(final_embeddings, os.path.join(BASE_DIR, "node_embeddings.pt"))
+print("💾 Saved: user_mapping.json, flight_mapping.json, loss_history.json, node_embeddings.pt")

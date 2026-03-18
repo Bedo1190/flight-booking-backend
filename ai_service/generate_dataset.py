@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import uuid
 import random
+import os
 from datetime import datetime, timedelta
 
 # --- Configuration ---
@@ -10,6 +11,9 @@ NUM_FLIGHTS = 50  # Assuming you have about 50 flights in your H2 database
 NUM_INTERACTIONS = 5000
 
 print("Initializing Synthetic Data Generation...")
+
+# Get the exact path to the ai_service folder dynamically
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 1. Generate Mock Users (Passenger UUIDs)
 users = [str(uuid.uuid4()) for _ in range(NUM_USERS)]
@@ -54,5 +58,7 @@ df = pd.DataFrame(interactions)
 # Optional: Sort chronologically so it looks like a real database dump
 df = df.sort_values(by="timestamp", ascending=True)
 
-df.to_csv("interactions.csv", index=False)
-print(f"Successfully generated interactions.csv with {len(df)} realistic edge records!")
+# Save directly to the ai_service folder
+output_path = os.path.join(BASE_DIR, "interactions.csv")
+df.to_csv(output_path, index=False)
+print(f"Successfully generated {output_path} with {len(df)} realistic edge records!")

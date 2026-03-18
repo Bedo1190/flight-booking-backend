@@ -1,21 +1,24 @@
 from fastapi import FastAPI, HTTPException
 import torch
 import json
+import os
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 app = FastAPI(title="SphereTech AI Recommendation Engine")
 
 print("Loading PyTorch Graph Embeddings...")
 try:
-    with open("user_mapping.json", "r") as f:
+    with open(os.path.join(BASE_DIR, "user_mapping.json"), "r") as f:
         user_mapping = json.load(f)
-    with open("flight_mapping.json", "r") as f:
+    with open(os.path.join(BASE_DIR, "flight_mapping.json"), "r") as f:
         flight_mapping = json.load(f)
         
     # Reverse the dictionary so we can map tensor indices back to real Flight IDs
     idx_to_flight = {v: int(k) for k, v in flight_mapping.items()}
     
     # Load the trained model weights
-    embeddings = torch.load("node_embeddings.pt", weights_only=True)
+    embeddings = torch.load(os.path.join(BASE_DIR, "node_embeddings.pt"), weights_only=True)
     num_users = len(user_mapping)
     print("✅ Model loaded successfully!")
     
