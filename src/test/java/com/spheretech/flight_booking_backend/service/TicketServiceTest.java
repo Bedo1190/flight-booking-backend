@@ -22,6 +22,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -123,5 +125,60 @@ class TicketServiceTest {
 
         // Act & Assert
         assertThrows(FlightFullException.class, () -> ticketService.purchaseTicket(request));
+    }
+    
+    @Test
+    void shouldGetSecuredTicket() {
+        // Arrange
+        Ticket ticket = new Ticket();
+        ticket.setTicketNumber("TK-12345");
+        ticket.setFirstName("John");
+        ticket.setLastName("Doe");
+        ticket.setFlight(testFlight);
+        ticket.setMaskedCardNumber("422116******0005");
+        ticket.setPricePaid(121.0);
+
+        when(ticketRepository.findByTicketNumberAndLastNameIgnoreCase("TK-12345", "Doe"))
+                .thenReturn(Optional.of(ticket));
+
+        // Act
+        TicketResponse response = ticketService.getSecuredTicket("TK-12345", "Doe");
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("TK-12345", response.ticketNumber());
+        assertEquals("Doe", response.lastName());
+    }
+
+    @Test
+    void shouldCancelSecuredTicket() {
+        // Arrange
+        Ticket ticket = new Ticket();
+        ticket.setTicketNumber("TK-12345");
+        ticket.setLastName("Doe");
+        testFlight.setOccupiedSeats(10);
+        ticket.setFlight(testFlight);
+
+        when(ticketRepository.findByTicketNumberAndLastNameIgnoreCase("TK-12345", "Doe"))
+                .thenReturn(Optional.of(ticket));
+
+        // Act
+        ticketService.cancelSecuredTicket("TK-12345", "Doe");
+
+        // Assert
+        assertEquals(9, testFlight.getOccupiedSeats()); // Occupancy should decrease
+        verify(flightRepository, times(1)).save(testFlight);
+        verify(ticketRepository, times(1)).delete(ticket);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenTicketNotFoundForSecurity() {
+        // Arrange
+        when(ticketRepository.findByTicketNumberAndLastNameIgnoreCase("TK-999", "Hacker"))
+                .thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(ResourceNotFoundException.class, 
+                () -> ticketService.getSecuredTicket("TK-999", "Hacker"));
     }
 }

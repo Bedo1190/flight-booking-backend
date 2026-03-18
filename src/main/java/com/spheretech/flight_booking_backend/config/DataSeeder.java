@@ -34,7 +34,7 @@ public class DataSeeder {
                 // Generate exactly 50 flights to match our Python AI Dataset!
                 for (int i = 1; i <= 50; i++) {
                     Route assignedRoute = (i % 2 == 0) ? route1 : route2; // Alternate routes
-                    flightRepo.save(new Flight(null, airline, assignedRoute, 500.0, 200, 0, LocalDateTime.now().plusDays(i)));
+                    flightRepo.save(new Flight(null, airline, 0L,assignedRoute, 500.0, 200, 0, LocalDateTime.now().plusDays(i)));
                 }
 
                 System.out.println("✅ Database successfully seeded with 50 flights for AI testing!");

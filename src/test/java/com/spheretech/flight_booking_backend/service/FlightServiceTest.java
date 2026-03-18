@@ -3,9 +3,11 @@ package com.spheretech.flight_booking_backend.service;
 import com.spheretech.flight_booking_backend.dto.FlightRequest;
 import com.spheretech.flight_booking_backend.exception.ResourceNotFoundException;
 import com.spheretech.flight_booking_backend.model.Airline;
+import com.spheretech.flight_booking_backend.model.Airport;
 import com.spheretech.flight_booking_backend.model.Flight;
 import com.spheretech.flight_booking_backend.model.Route;
 import com.spheretech.flight_booking_backend.repository.AirlineRepository;
+import com.spheretech.flight_booking_backend.repository.AirportRepository;
 import com.spheretech.flight_booking_backend.repository.FlightRepository;
 import com.spheretech.flight_booking_backend.repository.RouteRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,6 +23,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -31,6 +34,9 @@ class FlightServiceTest {
 
     @Mock
     private AirlineRepository airlineRepository;
+
+    @Mock
+    private AirportRepository airportRepository;
 
     @Mock
     private RouteRepository routeRepository;
@@ -55,7 +61,7 @@ class FlightServiceTest {
         when(airlineRepository.findById(1L)).thenReturn(Optional.of(airline));
         when(routeRepository.findById(1L)).thenReturn(Optional.of(route));
 
-        Flight savedFlight = new Flight(1L, airline, route, 100.0, 150, 0, request.departureTime());
+        Flight savedFlight = new Flight(1L, airline, 0L,route, 100.0, 150, 0, request.departureTime());
         when(flightRepository.save(any(Flight.class))).thenReturn(savedFlight);
 
         // Act
@@ -82,7 +88,7 @@ class FlightServiceTest {
     @Test
     void shouldSearchFlightsByAirline() {
         // Arrange
-        Flight flight = new Flight(1L, airline, route, 100.0, 150, 0, LocalDateTime.now().plusDays(1));
+        Flight flight = new Flight(1L, airline, 0L,route, 100.0, 150, 0, LocalDateTime.now().plusDays(1));
         when(flightRepository.findByAirlineId(1L)).thenReturn(List.of(flight));
 
         // Act
@@ -92,5 +98,37 @@ class FlightServiceTest {
         assertEquals(1, results.size());
         assertEquals("Turkish Airlines", results.get(0).getAirline().getName());
         verify(flightRepository, times(1)).findByAirlineId(1L);
+    }
+
+    @Test
+    void shouldSearchFlightsByRouteAndDate() {
+        // Arrange
+        // Create the exact boundaries mimicking the Service layer
+        java.time.LocalDate testDate = java.time.LocalDate.now();
+        LocalDateTime start = testDate.atStartOfDay();
+        
+        Flight flight = new Flight(1L, airline, 0L, route, 100.0, 150, 0, start.plusHours(12));
+        
+        // Mock the popularity score increment
+        Airport arrivalAirport = new Airport();
+        arrivalAirport.setPopularityScore(0);
+        when(airportRepository.findById("BER")).thenReturn(Optional.of(arrivalAirport));
+
+        // Use Mockito 'any()' matchers for the DateTimes to prevent nanosecond mismatches
+        when(flightRepository.searchFlightsByRouteAndDateRange(
+                eq("IST"), 
+                eq("BER"), 
+                any(LocalDateTime.class), 
+                any(LocalDateTime.class)))
+                .thenReturn(List.of(flight));
+
+        // Act
+        List<Flight> results = flightService.searchFlights("IST", "BER", testDate, testDate);
+
+        // Assert
+        assertEquals(1, results.size());
+        assertEquals(1, arrivalAirport.getPopularityScore()); // Verifies AI popularity logic
+        verify(airportRepository, times(1)).save(arrivalAirport);
+        verify(flightRepository, times(1)).searchFlightsByRouteAndDateRange(any(), any(), any(), any());
     }
 }

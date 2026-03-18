@@ -3,6 +3,7 @@ package com.spheretech.flight_booking_backend.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -58,6 +59,16 @@ public class GlobalExceptionHandler {
         });
         
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<Map<String, String>> handleOptimisticLockingFailure(ObjectOptimisticLockingFailureException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "High Traffic Alert");
+        errorResponse.put("message", "Another user just booked this exact seat or the price updated. Please refresh and try again.");
+        
+        // 409 Conflict is the perfect HTTP status code for concurrency issues
+        return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); 
     }
 
     // A catch-all for any other unexpected server errors

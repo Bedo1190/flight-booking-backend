@@ -86,10 +86,13 @@ class RouteServiceTest {
 
         // Act
         // FIXED: Method signature expects Strings
+        // Act
         List<Route> results = routeService.searchRoutes("IST", "BER");
 
         // Assert
         assertEquals(1, results.size());
+        assertEquals(101, arrival.getPopularityScore()); // <-- Verify the AI score increment!
+        verify(airportRepository, times(1)).save(arrival); // <-- Verify it was saved!
         verify(routeRepository, times(1)).findByDepartureAirportCodeAndArrivalAirportCode("IST", "BER");
     }
 }
