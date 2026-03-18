@@ -17,7 +17,6 @@ public class UserInteraction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Anonymous tracking ID for the user (We will use an email or UUID here)
     @Column(nullable = false)
     private String passengerId; 
 

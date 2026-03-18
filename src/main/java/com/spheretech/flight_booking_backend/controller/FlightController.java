@@ -23,13 +23,11 @@ public class FlightController {
         return new ResponseEntity<>(flightService.addFlight(request), HttpStatus.CREATED);
     }
 
-    // Moved the airline search to its own path
     @GetMapping("/airline")
     public ResponseEntity<List<Flight>> searchFlightsByAirline(@RequestParam Long airlineId) {
         return ResponseEntity.ok(flightService.searchFlightsByAirline(airlineId));
     }
 
-    // The new Master Search endpoint
     @GetMapping("/search")
     public ResponseEntity<List<Flight>> searchFlights(
             @RequestParam String departureCode,

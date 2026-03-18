@@ -21,7 +21,6 @@ public class TicketController {
         return new ResponseEntity<>(ticketService.purchaseTicket(request), HttpStatus.CREATED);
     }
 
-    // Example URL: GET /api/tickets/TK-8F9A2B?lastName=Doe
     @GetMapping("/{ticketNumber}")
     public ResponseEntity<TicketResponse> getTicketByNumber(
             @PathVariable String ticketNumber, 
@@ -29,7 +28,6 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getSecuredTicket(ticketNumber, lastName));
     }
 
-    // Example URL: DELETE /api/tickets/TK-8F9A2B?lastName=Doe
     @DeleteMapping("/{ticketNumber}")
     public ResponseEntity<Void> cancelTicket(
             @PathVariable String ticketNumber,

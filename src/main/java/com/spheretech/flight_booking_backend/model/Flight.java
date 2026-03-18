@@ -40,7 +40,6 @@ public class Flight {
             return basePrice;
         }
         
-        // Logic: 10% increase for every 10% occupancy
         double occupancyRate = (double) occupiedSeats / totalCapacity;
         int priceIncrements = (int) (occupancyRate * 10);
         return basePrice * Math.pow(1.10, priceIncrements); 

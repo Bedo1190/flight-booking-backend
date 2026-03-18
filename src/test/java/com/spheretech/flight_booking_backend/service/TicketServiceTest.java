@@ -68,8 +68,8 @@ class TicketServiceTest {
         testFlight.setId(1L);
         testFlight.setBasePrice(100.0);
         testFlight.setTotalCapacity(50);
-        testFlight.setOccupiedSeats(10); // 20% full -> price should be 121.0
-        testFlight.setRoute(route); // <-- This is the crucial fix!
+        testFlight.setOccupiedSeats(10); 
+        testFlight.setRoute(route); 
     }
 
     @Test
@@ -126,7 +126,7 @@ class TicketServiceTest {
         // Act & Assert
         assertThrows(FlightFullException.class, () -> ticketService.purchaseTicket(request));
     }
-    
+
     @Test
     void shouldGetSecuredTicket() {
         // Arrange

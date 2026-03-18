@@ -5,14 +5,10 @@ import random
 import os
 from datetime import datetime, timedelta
 
-# --- Configuration ---
 NUM_USERS = 500
-NUM_FLIGHTS = 50  # Assuming you have about 50 flights in your H2 database
+NUM_FLIGHTS = 50  
 NUM_INTERACTIONS = 5000
 
-print("Initializing Synthetic Data Generation...")
-
-# Get the exact path to the ai_service folder dynamically
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # 1. Generate Mock Users (Passenger UUIDs)
@@ -52,13 +48,31 @@ for _ in range(NUM_INTERACTIONS):
         "timestamp": timestamp.isoformat()
     })
 
+# Generate Flight Metadata
+regions = ["Europe", "Asia", "North America", "South America", "Middle East"]
+flight_metadata = []
+
+for f in flights:
+    flight_metadata.append({
+        "flight_id": f,
+        "latitude": round(random.uniform(20.0, 60.0), 4),  # Northern hemisphere focus
+        "longitude": round(random.uniform(-10.0, 50.0), 4),
+        "region": random.choice(regions),
+        "popularityScore": random.randint(0, 100)
+    })
+
+meta_df = pd.DataFrame(flight_metadata)
+meta_path = os.path.join(BASE_DIR, "flights_metadata.csv")
+meta_df.to_csv(meta_path, index=False)
+print(f"Generated hybrid flight metadata: {meta_path}")
+
 # 5. Export to CSV
 df = pd.DataFrame(interactions)
 
-# Optional: Sort chronologically so it looks like a real database dump
+#Sort chronologically so it looks like a real database dump
 df = df.sort_values(by="timestamp", ascending=True)
 
-# Save directly to the ai_service folder
+# Save
 output_path = os.path.join(BASE_DIR, "interactions.csv")
 df.to_csv(output_path, index=False)
-print(f"Successfully generated {output_path} with {len(df)} realistic edge records!")
+print(f"Successfully generated {output_path} with {len(df)} edges")

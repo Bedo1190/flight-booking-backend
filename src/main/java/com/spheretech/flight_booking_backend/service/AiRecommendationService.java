@@ -30,7 +30,7 @@ public class AiRecommendationService {
             }
             
         } catch (Exception e) {
-            System.err.println("⚠️ AI Service unreachable or user has no history. Triggering Cold Start fallback...");
+            System.err.println("AI Service unreachable or user has no history. Triggering fallback...");
         }
 
         // 3. COLD START FALLBACK: User has no history or Python is down

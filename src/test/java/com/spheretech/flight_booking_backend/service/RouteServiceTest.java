@@ -38,14 +38,12 @@ class RouteServiceTest {
     @BeforeEach
     void setUp() {
         departure = new Airport("IST", "Istanbul Airport", "Istanbul", "Türkiye", "Europe", 41.2590, 28.7404, 0);
-        // FIXED: Removed the extra parenthesis at the end of this line
         arrival = new Airport("BER", "Berlin Brandenburg", "Berlin", "Germany", "Europe", 52.3667, 13.5033, 100);
     }
 
     @Test
     void shouldAddRouteSuccessfully() {
         // Arrange
-        // FIXED: Swapped Long IDs for 3-letter IATA codes
         RouteRequest request = new RouteRequest("IST", "BER");
         when(airportRepository.findById("IST")).thenReturn(Optional.of(departure));
         when(airportRepository.findById("BER")).thenReturn(Optional.of(arrival));
@@ -66,7 +64,6 @@ class RouteServiceTest {
     @Test
     void shouldThrowExceptionWhenDepartureAirportNotFound() {
         // Arrange
-        // FIXED: Swapped Long IDs for 3-letter IATA codes
         RouteRequest request = new RouteRequest("XXX", "BER");
         when(airportRepository.findById("XXX")).thenReturn(Optional.empty());
 
@@ -79,13 +76,9 @@ class RouteServiceTest {
     void shouldSearchRoutes() {
         // Arrange
         Route route = new Route(1L, departure, arrival);
-        // FIXED: Mocked the airport lookup for the popularity score increment
         when(airportRepository.findById("BER")).thenReturn(Optional.of(arrival)); 
-        // FIXED: The repository method name now uses "Code" instead of "Id", and takes Strings
         when(routeRepository.findByDepartureAirportCodeAndArrivalAirportCode("IST", "BER")).thenReturn(List.of(route));
 
-        // Act
-        // FIXED: Method signature expects Strings
         // Act
         List<Route> results = routeService.searchRoutes("IST", "BER");
 

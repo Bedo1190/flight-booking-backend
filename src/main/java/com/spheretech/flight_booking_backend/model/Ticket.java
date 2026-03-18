@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -20,12 +21,14 @@ public class Ticket {
     @Column(unique = true, nullable = false)
     private String ticketNumber; 
 
-    // Split for security validation
     @Column(nullable = false)
     private String firstName;
     
     @Column(nullable = false)
     private String lastName;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime purchaseTime;
 
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
@@ -41,6 +44,9 @@ public class Ticket {
     protected void onCreate() {
         if (this.ticketNumber == null) {
             this.ticketNumber = "TK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        }
+        if (this.purchaseTime == null) {
+            this.purchaseTime = LocalDateTime.now();
         }
     }
 }

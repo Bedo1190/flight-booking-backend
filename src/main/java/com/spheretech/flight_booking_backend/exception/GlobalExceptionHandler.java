@@ -16,7 +16,6 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handles our custom 404 errors
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
             ResourceNotFoundException ex, HttpServletRequest request) {
@@ -31,7 +30,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    // Handles our custom business logic errors (like a full flight)
     @ExceptionHandler(FlightFullException.class)
     public ResponseEntity<ErrorResponse> handleFlightFullException(
             FlightFullException ex, HttpServletRequest request) {
@@ -46,7 +44,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
 
-    // Automatically handles the @Valid annotation failures from our DTOs
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(
             MethodArgumentNotValidException ex) {
@@ -67,11 +64,17 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", "High Traffic Alert");
         errorResponse.put("message", "Another user just booked this exact seat or the price updated. Please refresh and try again.");
         
-        // 409 Conflict is the perfect HTTP status code for concurrency issues
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT); 
     }
 
-    // A catch-all for any other unexpected server errors
+    @ExceptionHandler(FraudDetectedException.class)
+    public ResponseEntity<Map<String, String>> handleFraudException(FraudDetectedException ex) {
+        Map<String, String> errorResponse = new HashMap<>();
+        errorResponse.put("error", "Transaction Declined");
+        errorResponse.put("message", ex.getMessage());
+        return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
             Exception ex, HttpServletRequest request) {

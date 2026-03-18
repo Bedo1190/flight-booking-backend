@@ -23,7 +23,8 @@ public class FlightService {
     private final FlightRepository flightRepository;
     private final AirlineRepository airlineRepository;
     private final RouteRepository routeRepository;
-    private final AirportRepository airportRepository; 
+    private final AirportRepository airportRepository;
+    private final InteractionService interactionService; 
 
     public Flight addFlight(FlightRequest request) {
         Airline airline = airlineRepository.findById(request.airlineId())
@@ -38,7 +39,6 @@ public class FlightService {
         flight.setBasePrice(request.basePrice());
         flight.setTotalCapacity(request.totalCapacity());
         flight.setDepartureTime(request.departureTime());
-        // occupiedSeats defaults to 0 as defined in the entity
         
         return flightRepository.save(flight);
     }
@@ -48,24 +48,33 @@ public class FlightService {
     }
 
     public List<Flight> searchFlights(String departureCode, String arrivalCode, LocalDate startDate, LocalDate endDate) {
-        
-        // 1. If the user didn't provide an end date, make it a 1-day search
-        if (endDate == null) {
-            endDate = startDate;
-        }
-
-        // 2. Start boundary is midnight of the start date
-        LocalDateTime startBoundary = startDate.atStartOfDay();
-        
-        // 3. End boundary is midnight of the day AFTER the end date
-        LocalDateTime endBoundary = endDate.plusDays(1).atStartOfDay();
-        
-        // 4. ML Feature: Boost the destination's popularity score!
-        airportRepository.findById(arrivalCode).ifPresent(airport -> {
-            airport.setPopularityScore(airport.getPopularityScore() + 1);
-            airportRepository.save(airport);
-        });
-        
-        return flightRepository.searchFlightsByRouteAndDateRange(departureCode, arrivalCode, startBoundary, endBoundary);
+    
+    // 1. If the user didn't provide an end date, make it a 1-day search
+    if (endDate == null) {
+        endDate = startDate;
     }
+
+    // 2. Start boundary is midnight of the start date
+    LocalDateTime startBoundary = startDate.atStartOfDay();
+    
+    // 3. End boundary is midnight of the day after the end date
+    LocalDateTime endBoundary = endDate.plusDays(1).atStartOfDay();
+    
+    // 4. Boost the destination's popularity score
+    airportRepository.findById(arrivalCode).ifPresent(airport -> {
+        airport.setPopularityScore(airport.getPopularityScore() + 1);
+        airportRepository.save(airport);
+    });
+
+    // 5. Fetch the flight results
+    List<Flight> results = flightRepository.searchFlightsByRouteAndDateRange(departureCode, arrivalCode, startBoundary, endBoundary);
+
+    // 6. Log the Interaction for the AI
+    if (!results.isEmpty()) {
+        // Log the first result as the representative for this search interaction
+        interactionService.logInteraction("guest", results.get(0).getId(), "SEARCH");
+    }
+    
+    return results;
+}
 }

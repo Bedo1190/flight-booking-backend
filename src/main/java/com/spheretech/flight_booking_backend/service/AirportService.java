@@ -23,7 +23,6 @@ public class AirportService {
         airport.setRegion(request.region());
         airport.setLatitude(request.latitude());
         airport.setLongitude(request.longitude());
-        // popularityScore safely defaults to 0
         return airportRepository.save(airport);
     }
 

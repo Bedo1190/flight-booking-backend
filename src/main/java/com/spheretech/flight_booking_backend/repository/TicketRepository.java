@@ -8,6 +8,7 @@ import java.util.Optional;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    // SECURED: Requires both the ticket number and the passenger's last name
     Optional<Ticket> findByTicketNumberAndLastNameIgnoreCase(String ticketNumber, String lastName);
+
+    Optional<Ticket> findFirstByMaskedCardNumberOrderByPurchaseTimeDesc(String maskedCardNumber);
 }

@@ -34,7 +34,6 @@ public class RouteService {
 
     public List<Route> searchRoutes(String departureCode, String arrivalCode) {
         
-        // FindById now naturally accepts the String code!
         airportRepository.findById(arrivalCode).ifPresent(airport -> {
             airport.setPopularityScore(airport.getPopularityScore() + 1);
             airportRepository.save(airport);

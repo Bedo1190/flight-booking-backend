@@ -13,5 +13,6 @@ public record TicketResponse(
     String arrivalCity,
     LocalDateTime departureTime,
     String maskedCardNumber,
-    Double pricePaid
+    Double pricePaid,
+    LocalDateTime purchaseTime
 ) {}
