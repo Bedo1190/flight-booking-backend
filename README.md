@@ -68,3 +68,5 @@ Here are the main ways to interact with the system (I've included a Postman coll
 * `GET /api/recommendations/{passengerId}` - Gets top 5 personalized flights from the PyTorch GNN.
 * `GET /api/flights/search` - Searches flights and quietly logs a "SEARCH" interaction to train the AI.
 * `POST /api/routes` & `POST /api/flights` - Admin endpoints to build the network.
+
+# To test further: use https://github.com/Bedo1190/flight-booking-backend/blob/main/flight-booking-backend.postman_collection.json on postman
