@@ -22,9 +22,11 @@ public class DataSeeder {
                 Airline airline = airlineRepo.save(new Airline(null, "SphereTech Airlines"));
 
                 // We give Berlin a popularity of 100, and NY a popularity of 20
-                Airport departure = airportRepo.save(new Airport(null, "Istanbul Airport", "Istanbul", "IST", "Europe", 41.2590, 28.7404, 0));
-                Airport arrival1 = airportRepo.save(new Airport(null, "Berlin Brandenburg", "Berlin", "BER", "Europe", 52.3667, 13.5033, 100));
-                Airport arrival2 = airportRepo.save(new Airport(null, "JFK International", "New York", "JFK", "North America", 40.6413, -73.7781, 20));
+                // Update these three lines in your initDatabase() method:
+
+                Airport departure = airportRepo.save(new Airport("IST", "Istanbul Airport", "Istanbul", "Türkiye", "Europe", 41.2590, 28.7404, 0));
+                Airport arrival1 = airportRepo.save(new Airport("BER", "Berlin Brandenburg", "Berlin", "Germany", "Europe", 52.3667, 13.5033, 100));
+                Airport arrival2 = airportRepo.save(new Airport("JFK", "JFK International", "New York", "USA", "North America", 40.6413, -73.7781, 20));
 
                 Route route1 = routeRepo.save(new Route(null, departure, arrival1));
                 Route route2 = routeRepo.save(new Route(null, departure, arrival2));

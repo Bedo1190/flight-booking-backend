@@ -2,8 +2,6 @@ package com.spheretech.flight_booking_backend.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,11 +13,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Airport {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(length = 3, updatable = false, nullable = false)
+    private String code; // e.g., "IST", "FRA", "BER"
     private String name;
     private String city;
-    private String code; // e.g., "IST"
+    private String country;
     
     // ML Feature: Categorical grouping
     private String region; 

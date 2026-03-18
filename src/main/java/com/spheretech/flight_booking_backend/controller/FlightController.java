@@ -23,8 +23,20 @@ public class FlightController {
         return new ResponseEntity<>(flightService.addFlight(request), HttpStatus.CREATED);
     }
 
-    @GetMapping("/search")
+    // Moved the airline search to its own path
+    @GetMapping("/airline")
     public ResponseEntity<List<Flight>> searchFlightsByAirline(@RequestParam Long airlineId) {
         return ResponseEntity.ok(flightService.searchFlightsByAirline(airlineId));
+    }
+
+    // The new Master Search endpoint
+    @GetMapping("/search")
+    public ResponseEntity<List<Flight>> searchFlights(
+            @RequestParam String departureCode,
+            @RequestParam String arrivalCode,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate startDate,
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate endDate) {
+        
+        return ResponseEntity.ok(flightService.searchFlights(departureCode, arrivalCode, startDate, endDate));
     }
 }

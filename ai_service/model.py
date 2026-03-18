@@ -11,7 +11,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 print("🚀 Initializing Graph Neural Network Training Pipeline...")
 
 # --- 1. Load and Prepare Data ---
-df = pd.read_csv("interactions.csv")
+df = pd.read_csv(os.path.join(BASE_DIR, "interactions.csv"))
 
 # Create unique index mappings for Users and Flights
 unique_users = df['passenger_id'].unique()
@@ -27,7 +27,7 @@ total_nodes = num_users + num_flights
 # Save mappings for the FastAPI server to use later
 with open(os.path.join(BASE_DIR, "user_mapping.json"), "w") as f:
     json.dump(user_mapping, f)
-with open(os.path.join(BASE_DIR, "node_embeddings.pt"), "w") as f:
+with open(os.path.join(BASE_DIR, "flight_mapping.json"), "w") as f:
     json.dump(flight_mapping, f)
 
 # Build the Edge Index (Source -> Target)

@@ -29,8 +29,8 @@ class AirportServiceTest {
     @Test
     void shouldAddAirport() {
         // Arrange
-        AirportRequest request = new AirportRequest("Istanbul Airport", "Istanbul", "IST", "Europe", 41.2590, 28.7404);
-        Airport savedAirport = new Airport(1L, "Istanbul Airport", "Istanbul", "IST", "Europe", 41.2590, 28.7404, 0);
+        AirportRequest request = new AirportRequest("Istanbul Airport", "Istanbul", "IST", "Türkiye","Europe", 41.2590, 28.7404);
+        Airport savedAirport = new Airport("IST", "Istanbul Airport","Istanbul", "Türkiye", "Europe", 41.2590, 28.7404, 0);
 
         when(airportRepository.save(any(Airport.class))).thenReturn(savedAirport);
 
@@ -46,7 +46,7 @@ class AirportServiceTest {
     @Test
     void shouldSearchAirports() {
         // Arrange
-        Airport airport = new Airport(1L, "Istanbul Airport", "Istanbul", "IST", "Europe", 41.2590, 28.7404, 0);
+        Airport airport = new Airport("IST", "Istanbul Airport","Istanbul", "Türkiye", "Europe", 41.2590, 28.7404, 0);
         when(airportRepository.findByNameContainingIgnoreCase(anyString())).thenReturn(List.of(airport));
 
         // Act

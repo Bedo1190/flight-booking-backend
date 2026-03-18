@@ -19,6 +19,7 @@ public class AirportService {
         airport.setName(request.name());
         airport.setCity(request.city());
         airport.setCode(request.code());
+        airport.setCountry(request.country());
         airport.setRegion(request.region());
         airport.setLatitude(request.latitude());
         airport.setLongitude(request.longitude());

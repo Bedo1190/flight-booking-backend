@@ -17,30 +17,29 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // A unique identifier generated at purchase for search and cancellation 
     @Column(unique = true, nullable = false)
     private String ticketNumber; 
 
+    // Split for security validation
     @Column(nullable = false)
-    private String passengerName;
+    private String firstName;
+    
+    @Column(nullable = false)
+    private String lastName;
 
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
     private Flight flight;
 
-    // Storing ONLY the masked version for security 
     @Column(nullable = false)
     private String maskedCardNumber; 
 
-    // Locks in the price the user actually paid at the moment of booking
     @Column(nullable = false)
     private Double pricePaid; 
 
-    // Helper method to automatically generate a random ticket number before saving
     @PrePersist
     protected void onCreate() {
         if (this.ticketNumber == null) {
-            // Generates a short, unique alphanumeric ticket number (e.g., "TK-8f9a2b")
             this.ticketNumber = "TK-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         }
     }

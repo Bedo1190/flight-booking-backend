@@ -9,8 +9,11 @@ public record TicketPurchaseRequest(
     @NotNull(message = "Flight ID cannot be null") 
     Long flightId,
     
-    @NotBlank(message = "Passenger name is required") 
-    String passengerName,
+    @NotBlank(message = "First name is required") 
+    String firstName,
+
+    @NotBlank(message = "Last name is required") 
+    String lastName,
 
     @NotBlank(message = "Passenger ID (Email) is required")
     @Email(message = "Passenger ID must be a valid email format")

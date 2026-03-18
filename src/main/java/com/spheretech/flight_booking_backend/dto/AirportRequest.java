@@ -15,6 +15,9 @@ public record AirportRequest(
     @NotBlank(message = "Airport code is required") 
     String code,
 
+    @NotBlank(message = "Country is required")
+    String country,
+
     @NotBlank(message = "Region is required for recommendations")
     String region,
 

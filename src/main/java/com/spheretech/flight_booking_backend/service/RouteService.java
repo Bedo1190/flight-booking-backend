@@ -19,11 +19,11 @@ public class RouteService {
     private final AirportRepository airportRepository;
 
     public Route addRoute(RouteRequest request) {
-        Airport departure = airportRepository.findById(request.departureAirportId())
-                .orElseThrow(() -> new ResourceNotFoundException("Departure Airport not found with ID: " + request.departureAirportId()));
+        Airport departure = airportRepository.findById(request.departureAirportCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Departure Airport not found with code: " + request.departureAirportCode()));
         
-        Airport arrival = airportRepository.findById(request.arrivalAirportId())
-                .orElseThrow(() -> new ResourceNotFoundException("Arrival Airport not found with ID: " + request.arrivalAirportId()));
+        Airport arrival = airportRepository.findById(request.arrivalAirportCode())
+                .orElseThrow(() -> new ResourceNotFoundException("Arrival Airport not found with code: " + request.arrivalAirportCode()));
 
         Route route = new Route();
         route.setDepartureAirport(departure);
@@ -32,13 +32,14 @@ public class RouteService {
         return routeRepository.save(route);
     }
 
-    public List<Route> searchRoutes(Long departureId, Long arrivalId) {
-        // Update Arrival Airport Popularity (+1 for search)
-        airportRepository.findById(arrivalId).ifPresent(airport -> {
+    public List<Route> searchRoutes(String departureCode, String arrivalCode) {
+        
+        // FindById now naturally accepts the String code!
+        airportRepository.findById(arrivalCode).ifPresent(airport -> {
             airport.setPopularityScore(airport.getPopularityScore() + 1);
             airportRepository.save(airport);
         });
-        
-        return routeRepository.findByDepartureAirportIdAndArrivalAirportId(departureId, arrivalId);
+
+        return routeRepository.findByDepartureAirportCodeAndArrivalAirportCode(departureCode, arrivalCode);
     }
 }

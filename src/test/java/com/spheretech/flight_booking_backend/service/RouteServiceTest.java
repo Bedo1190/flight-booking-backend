@@ -37,16 +37,18 @@ class RouteServiceTest {
 
     @BeforeEach
     void setUp() {
-        departure = new Airport(1L, "Istanbul Airport", "Istanbul", "IST", "Europe", 41.2590, 28.7404, 0);
-        arrival = new Airport(2L, "Berlin Brandenburg", "Berlin", "BER", "Europe", 52.3667, 13.5033, 0);
+        departure = new Airport("IST", "Istanbul Airport", "Istanbul", "Türkiye", "Europe", 41.2590, 28.7404, 0);
+        // FIXED: Removed the extra parenthesis at the end of this line
+        arrival = new Airport("BER", "Berlin Brandenburg", "Berlin", "Germany", "Europe", 52.3667, 13.5033, 100);
     }
 
     @Test
     void shouldAddRouteSuccessfully() {
         // Arrange
-        RouteRequest request = new RouteRequest(1L, 2L);
-        when(airportRepository.findById(1L)).thenReturn(Optional.of(departure));
-        when(airportRepository.findById(2L)).thenReturn(Optional.of(arrival));
+        // FIXED: Swapped Long IDs for 3-letter IATA codes
+        RouteRequest request = new RouteRequest("IST", "BER");
+        when(airportRepository.findById("IST")).thenReturn(Optional.of(departure));
+        when(airportRepository.findById("BER")).thenReturn(Optional.of(arrival));
 
         Route savedRoute = new Route(1L, departure, arrival);
         when(routeRepository.save(any(Route.class))).thenReturn(savedRoute);
@@ -64,8 +66,9 @@ class RouteServiceTest {
     @Test
     void shouldThrowExceptionWhenDepartureAirportNotFound() {
         // Arrange
-        RouteRequest request = new RouteRequest(99L, 2L);
-        when(airportRepository.findById(99L)).thenReturn(Optional.empty());
+        // FIXED: Swapped Long IDs for 3-letter IATA codes
+        RouteRequest request = new RouteRequest("XXX", "BER");
+        when(airportRepository.findById("XXX")).thenReturn(Optional.empty());
 
         // Act & Assert
         assertThrows(ResourceNotFoundException.class, () -> routeService.addRoute(request));
@@ -76,13 +79,17 @@ class RouteServiceTest {
     void shouldSearchRoutes() {
         // Arrange
         Route route = new Route(1L, departure, arrival);
-        when(routeRepository.findByDepartureAirportIdAndArrivalAirportId(1L, 2L)).thenReturn(List.of(route));
+        // FIXED: Mocked the airport lookup for the popularity score increment
+        when(airportRepository.findById("BER")).thenReturn(Optional.of(arrival)); 
+        // FIXED: The repository method name now uses "Code" instead of "Id", and takes Strings
+        when(routeRepository.findByDepartureAirportCodeAndArrivalAirportCode("IST", "BER")).thenReturn(List.of(route));
 
         // Act
-        List<Route> results = routeService.searchRoutes(1L, 2L);
+        // FIXED: Method signature expects Strings
+        List<Route> results = routeService.searchRoutes("IST", "BER");
 
         // Assert
         assertEquals(1, results.size());
-        verify(routeRepository, times(1)).findByDepartureAirportIdAndArrivalAirportId(1L, 2L);
+        verify(routeRepository, times(1)).findByDepartureAirportCodeAndArrivalAirportCode("IST", "BER");
     }
 }

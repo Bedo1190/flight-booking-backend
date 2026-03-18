@@ -21,81 +21,76 @@ public class TicketService {
 
     private final TicketRepository ticketRepository;
     private final FlightRepository flightRepository;
-    private final InteractionService interactionService; // Injected our new service
+    private final InteractionService interactionService;
     private final AirportRepository airportRepository;
 
     @Transactional
     public TicketResponse purchaseTicket(TicketPurchaseRequest request) {
-        // 1. Retrieve the flight
         Flight flight = flightRepository.findById(request.flightId())
                 .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + request.flightId()));
 
-        // 2. Check capacity
         if (flight.getOccupiedSeats() >= flight.getTotalCapacity()) {
             throw new FlightFullException("Flight " + flight.getId() + " is currently at maximum capacity.");
         }
 
-        // 3. Calculate current price based on occupancy
-        Double currentPrice = flight.getCurrentPrice();
-
-        // 4. Create and populate the Ticket entity
         Ticket ticket = new Ticket();
         ticket.setFlight(flight);
-        ticket.setPassengerName(request.passengerName());
+        ticket.setFirstName(request.firstName());
+        ticket.setLastName(request.lastName());
         ticket.setMaskedCardNumber(CardUtils.maskCardNumber(request.cardNumber()));
-        ticket.setPricePaid(currentPrice);
+        ticket.setPricePaid(flight.getCurrentPrice());
 
-        // 5. Save the ticket (this triggers the @PrePersist to generate the ticketNumber)
         Ticket savedTicket = ticketRepository.save(ticket);
 
-        // 6. Update flight occupancy
         flight.setOccupiedSeats(flight.getOccupiedSeats() + 1);
         flightRepository.save(flight);
 
-        // Update Arrival Airport Popularity (+2 for purchase) 
         Airport arrivalAirport = flight.getRoute().getArrivalAirport();
         arrivalAirport.setPopularityScore(arrivalAirport.getPopularityScore() + 2);
         airportRepository.save(arrivalAirport);
         
-        // 7. Log the interaction for the AI Graph model
         interactionService.logInteraction(request.passengerId(), flight.getId(), "PURCHASE");
 
-        // 8. Return the response DTO
-        return new TicketResponse(
-                savedTicket.getTicketNumber(),
-                savedTicket.getPassengerName(),
-                savedTicket.getFlight().getId(),
-                savedTicket.getMaskedCardNumber(),
-                savedTicket.getPricePaid()
-        );
+        return mapToResponse(savedTicket);
     }
 
-    public TicketResponse getTicketByNumber(String ticketNumber) {
-        Ticket ticket = ticketRepository.findByTicketNumber(ticketNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with number: " + ticketNumber));
+    public TicketResponse getSecuredTicket(String ticketNumber, String lastName) {
+        Ticket ticket = ticketRepository.findByTicketNumberAndLastNameIgnoreCase(ticketNumber, lastName)
+                .orElseThrow(() -> new ResourceNotFoundException("No ticket found matching that number and last name."));
         
-        return new TicketResponse(
-                ticket.getTicketNumber(),
-                ticket.getPassengerName(),
-                ticket.getFlight().getId(),
-                ticket.getMaskedCardNumber(),
-                ticket.getPricePaid()
-        );
+        return mapToResponse(ticket);
     }
 
     @Transactional
-    public void cancelTicket(String ticketNumber) {
-         Ticket ticket = ticketRepository.findByTicketNumber(ticketNumber)
-                .orElseThrow(() -> new ResourceNotFoundException("Ticket not found with number: " + ticketNumber));
+    public void cancelSecuredTicket(String ticketNumber, String lastName) {
+         Ticket ticket = ticketRepository.findByTicketNumberAndLastNameIgnoreCase(ticketNumber, lastName)
+                .orElseThrow(() -> new ResourceNotFoundException("No ticket found matching that number and last name."));
 
          Flight flight = ticket.getFlight();
          
-         // Decrease occupancy
          if(flight.getOccupiedSeats() > 0) {
              flight.setOccupiedSeats(flight.getOccupiedSeats() - 1);
              flightRepository.save(flight);
          }
          
          ticketRepository.delete(ticket);
+    }
+
+    // Helper method to keep your code DRY (Don't Repeat Yourself)
+    private TicketResponse mapToResponse(Ticket ticket) {
+        Flight flight = ticket.getFlight();
+        return new TicketResponse(
+                ticket.getTicketNumber(),
+                flight.getId(),
+                ticket.getFirstName(),
+                ticket.getLastName(),
+                flight.getRoute().getDepartureAirport().getCode(),
+                flight.getRoute().getDepartureAirport().getCity(),
+                flight.getRoute().getArrivalAirport().getCode(),
+                flight.getRoute().getArrivalAirport().getCity(),
+                flight.getDepartureTime(),
+                ticket.getMaskedCardNumber(),
+                ticket.getPricePaid()
+        );
     }
 }

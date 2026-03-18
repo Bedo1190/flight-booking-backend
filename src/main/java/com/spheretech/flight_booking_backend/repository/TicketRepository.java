@@ -8,6 +8,6 @@ import java.util.Optional;
 
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, Long> {
-    // Finds a specific ticket by its unique ticket number for viewing or cancellation
-    Optional<Ticket> findByTicketNumber(String ticketNumber);
+    // SECURED: Requires both the ticket number and the passenger's last name
+    Optional<Ticket> findByTicketNumberAndLastNameIgnoreCase(String ticketNumber, String lastName);
 }

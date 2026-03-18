@@ -25,8 +25,8 @@ public class RouteController {
 
     @GetMapping("/search")
     public ResponseEntity<List<Route>> searchRoutes(
-            @RequestParam Long departureId, 
-            @RequestParam Long arrivalId) {
-        return ResponseEntity.ok(routeService.searchRoutes(departureId, arrivalId));
+            @RequestParam String departureCode, 
+            @RequestParam String arrivalCode) {
+        return ResponseEntity.ok(routeService.searchRoutes(departureCode, arrivalCode));
     }
 }

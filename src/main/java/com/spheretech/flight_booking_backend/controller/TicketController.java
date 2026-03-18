@@ -21,14 +21,20 @@ public class TicketController {
         return new ResponseEntity<>(ticketService.purchaseTicket(request), HttpStatus.CREATED);
     }
 
+    // Example URL: GET /api/tickets/TK-8F9A2B?lastName=Doe
     @GetMapping("/{ticketNumber}")
-    public ResponseEntity<TicketResponse> getTicketByNumber(@PathVariable String ticketNumber) {
-        return ResponseEntity.ok(ticketService.getTicketByNumber(ticketNumber));
+    public ResponseEntity<TicketResponse> getTicketByNumber(
+            @PathVariable String ticketNumber, 
+            @RequestParam String lastName) {
+        return ResponseEntity.ok(ticketService.getSecuredTicket(ticketNumber, lastName));
     }
 
+    // Example URL: DELETE /api/tickets/TK-8F9A2B?lastName=Doe
     @DeleteMapping("/{ticketNumber}")
-    public ResponseEntity<Void> cancelTicket(@PathVariable String ticketNumber) {
-        ticketService.cancelTicket(ticketNumber);
-        return ResponseEntity.noContent().build(); // Returns a 204 No Content status
+    public ResponseEntity<Void> cancelTicket(
+            @PathVariable String ticketNumber,
+            @RequestParam String lastName) {
+        ticketService.cancelSecuredTicket(ticketNumber, lastName);
+        return ResponseEntity.noContent().build(); 
     }
 }
